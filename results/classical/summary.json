@@ -1,0 +1,12 @@
+{
+  "bicubic": {
+    "psnr_db": 30.146217530220184,
+    "excess_edge_energy": 0.005641335547619656,
+    "label_crop_mae": 0.030968903482802335
+  },
+  "unsharp": {
+    "psnr_db": 28.545741857950503,
+    "excess_edge_energy": 0.012368387957803562,
+    "label_crop_mae": 0.03674513504588827
+  }
+}

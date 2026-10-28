@@ -1,0 +1,6 @@
+numpy>=1.24,<3
+scipy>=1.10,<2
+Pillow>=10,<13
+requests>=2.31,<3
+# GPU run also requires the pinned upstream DiffBIR environment; see README.
+

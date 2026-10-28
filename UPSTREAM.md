@@ -1,9 +1,1 @@
-# Upstream sources
-
-[XPixelGroup/DiffBIR](https://github.com/XPixelGroup/DiffBIR/tree/5c2d6c177c3f2965e6d33a32931248d242ef7b3d)
-
-- Revision: 5c2d6c177c3f2965e6d33a32931248d242ef7b3d
-- Reported code license: Apache-2.0
-- Starting point: inference.py
-- Integration: use the upstream implementation as a separately pinned dependency. Preserve the original notices when redistributing source.
-- Weights and data have separate terms. Their source, revision and attribution belong with the experiment manifest.
+DiffBIR at https://github.com/XPixelGroup/DiffBIR/tree/5c2d6c177c3f2965e6d33a32931248d242ef7b3d (Apache-2.0). Uses BSRInferenceLoop, upstream cleaner and tiled inference; a runtime instrumentation wrapper saves the actual intermediate cleaner prediction and per-case total runtime. No upstream source is vendored. Source code and model weights are separate downloads; original pretrained assets are listed in diffbir/inference/pretrained_models.py. Dataset attribution in data.md.
