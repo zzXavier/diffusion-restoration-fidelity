@@ -1,2 +1,4 @@
 Stage: CPU comparison across 12 degraded inputs. Rebuild with python run.py reproduce --classical-only, then python run.py evaluate --classical-only. Full upstream source revision checked out. Next step is the independent CUDA environment install and python run.py demo. Full stage-1/diffusion evidence and clean clone validation required for publication.
 
+The real upstream SwinIR stage-1 now passes 12/12 inputs; replay python run.py evaluate --stage1-only. Source checkpoint SHA-256 577b8f84815d324e5ee17ef3c85d8bc9b7ebd05b20a6d61a5452b66e7e24dcaf. Full weights are pinned in src/fetch_full.py. GPU diffusion and clean-clone validation remain.
+The full DiffBIR BSRInferenceLoop imported with torch 2.4.1+cu121 and NumPy 1.26.4. Perf evidence for stage-1-only is in results/classical/stage1/runtime.json (CPU mean ~2.43 s per image).

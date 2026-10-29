@@ -4,3 +4,4 @@ Pillow>=10,<13
 requests>=2.31,<3
 # GPU run also requires the pinned upstream DiffBIR environment; see README.
 
+PyYAML>=6,<7
