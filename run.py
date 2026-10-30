@@ -74,8 +74,16 @@ def evaluate(out, baseline=False, stage1_only=False):
             }
     (out / "summary.json").write_text(json.dumps(groups, indent=2))
     picked = next((c for c in records if c["split"] == "test"), records[0])
-    name = picked["file"]
     names = ["truth", *methods]
+    render_case(out, names, picked["file"], "comparison.jpg")
+    test = [r for r in rows if r["method"] == methods[-1] and r["split"] == "test"]
+    if test:
+        worst = max(test, key=lambda x: x["excess_edge_energy"])
+        render_case(out, names, worst["file"], "highest-excess-edge.jpg")
+        (out / "highest-excess-edge.json").write_text(json.dumps(worst, indent=2))
+
+
+def render_case(out, names, name, destination):
     panel = Image.new("RGB", (len(names) * 176, 245), "white")
     d = ImageDraw.Draw(panel)
     for n, model in enumerate(names):
@@ -83,7 +91,7 @@ def evaluate(out, baseline=False, stage1_only=False):
         panel.paste(im.resize((176, 176)), (176 * n, 17))
         panel.paste(im.crop((174, 200, 338, 248)).resize((176, 52)), (176 * n, 193))
         d.text((176 * n + 3, 2), model, fill="black")
-    panel.save(out / "comparison.jpg")
+    panel.save(out / destination)
 
 
 def run(out, demo, baseline, stage1_only=False):
@@ -124,11 +132,12 @@ if __name__ == "__main__":
     g.add_argument("--stage1-only", action="store_true")
     p.add_argument("--output", type=Path)
     a = p.parse_args()
-    out = a.output or ROOT / "results" / (
-        "classical"
-        if a.classical_only or a.stage1_only
-        else ("demo" if a.action == "demo" else "formal")
+    group = (
+        "classical" if a.stage1_only else "baselines" if a.classical_only else "formal"
     )
+    if a.action == "demo":
+        group = "demo" if group == "formal" else f"demo-{group}"
+    out = a.output or ROOT / "results" / group
     if a.action == "evaluate":
         evaluate(out, a.classical_only, a.stage1_only)
     else:

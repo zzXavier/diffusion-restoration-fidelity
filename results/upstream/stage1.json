@@ -1,0 +1,16 @@
+{
+  "case": "upstream inputs/demo/bsr/comic3.png",
+  "input_sha256": "c5d6c569f7593e676cc22340997416a2ead4580cb44e3d1d45a548040abd18f7",
+  "upscale": 2,
+  "weights_revision": "fd6263503564bfbfa156665a90832e1b729434f4",
+  "mode": "stage1-CPU",
+  "outputs": {
+    "stage1": {
+      "sha256": "f5317220d1445c461f6716ad3b827022657b1bb6cbd93f507b3f962bef81ea5d",
+      "size": [
+        512,
+        512
+      ]
+    }
+  }
+}
