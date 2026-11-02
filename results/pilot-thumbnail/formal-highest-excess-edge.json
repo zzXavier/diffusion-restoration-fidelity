@@ -1,0 +1,10 @@
+{
+  "id": "B074H6ZXT5",
+  "split": "test",
+  "kind": "blur",
+  "file": "B074H6ZXT5-blur.png",
+  "method": "diffusion",
+  "psnr_db": 20.307712870764043,
+  "excess_edge_energy": 0.05847089181538501,
+  "label_crop_mae": 0.07615766835189361
+}

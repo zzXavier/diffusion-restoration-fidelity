@@ -1,6 +1,12 @@
 import argparse
 import csv
+import hashlib
 import json
+import os
+import platform
+import sqlite3
+import tempfile
+from contextlib import closing, contextmanager
 from io import BytesIO
 from pathlib import Path
 import numpy as np
@@ -46,14 +52,105 @@ def score(target, pred):
     }
 
 
-def evaluate(out, baseline=False, stage1_only=False):
-    records = json.loads((out / "cases.json").read_text())
-    rows = []
-    methods = (
+def method_names(baseline, stage1_only):
+    return (
         ["bicubic", "unsharp"]
         + ([] if baseline else ["stage1"])
         + ([] if baseline or stage1_only else ["diffusion"])
     )
+
+
+@contextmanager
+def output_lock(out):
+    # OS-backed SQLite locks are released even if the process is terminated.
+    key = hashlib.sha256(os.path.normcase(str(out.resolve())).encode()).hexdigest()
+    path = Path(tempfile.gettempdir()) / f"diffbir-output-{key}.lock"
+    with closing(sqlite3.connect(path, timeout=0)) as lock:
+        try:
+            lock.execute("BEGIN IMMEDIATE")
+        except sqlite3.OperationalError as exc:
+            raise RuntimeError(f"Output directory is already in use: {out}") from exc
+        yield
+
+
+def save_state(out, state):
+    tmp = out / ".run-state.tmp"
+    tmp.write_text(json.dumps(state, indent=2, allow_nan=False) + "\n", encoding="utf8")
+    tmp.replace(out / "manifest.json")
+
+
+def checked_files(out, mode, methods):
+    subjects = [s for s in items() if s["id"] != "B083V9C8D2"]
+    if mode not in ("demo", "formal"):
+        raise ValueError("Unknown run profile")
+    if mode == "demo":
+        subjects = subjects[:1]
+    kinds = ["jpeg"] if mode == "demo" else ["blur", "noise", "jpeg"]
+    expected = [
+        {"id": s["id"], "split": s["split"], "kind": k, "file": f"{s['id']}-{k}.png"}
+        for s in subjects for k in kinds
+    ]
+    if not expected or json.loads((out / "cases.json").read_text()) != expected:
+        raise ValueError("Unexpected or incomplete case list")
+    files = [f"{folder}/{row['file']}" for row in expected for folder in ("truth", "degraded", *methods)]
+    if "diffusion" in methods:
+        files += [f"diffusion/{Path(row['file']).stem}.json" for row in expected]
+    elif "stage1" in methods:
+        files.append("stage1/runtime.json")
+    hashes = {}
+    for relative in files:
+        path = out / relative
+        if not path.is_file():
+            raise ValueError(f"Missing required output: {relative}")
+        if path.suffix == ".json":
+            # Ignore platform line endings when verifying tracked JSON.
+            value = json.loads(path.read_text())
+            if relative == "stage1/runtime.json":
+                if set(value["cases"]) != {r["file"] for r in expected}:
+                    raise ValueError("Incomplete stage1 runtime cases")
+            elif not all(np.isfinite(value[k]) and value[k] > 0 for k in ("seconds", "peak_allocated_mb")):
+                raise ValueError(f"Invalid diffusion runtime record: {relative}")
+            payload = json.dumps(value, sort_keys=True, allow_nan=False).encode()
+        else:
+            payload = path.read_bytes()
+            size = (256, 256) if relative.startswith("degraded/") else (512, 512)
+            with Image.open(BytesIO(payload)) as image:
+                if image.size != size:
+                    raise ValueError(f"Wrong image dimensions: {relative}")
+                image.verify()
+        hashes[relative] = hashlib.sha256(payload).hexdigest()
+    return expected, hashes
+
+
+def evaluate(out, baseline=False, stage1_only=False):
+    methods = method_names(baseline, stage1_only)
+    with output_lock(out):
+        marker = out / "manifest.json"
+        if marker.is_file():
+            state = json.loads(marker.read_text())
+        else:
+            # Unmarked legacy copies are eligible only if their complete file set
+            # exactly matches an independently verified, shipped reference run.
+            reference = ROOT / "results" / ("formal" if "diffusion" in methods else "classical" if "stage1" in methods else "baselines") / "manifest.json"
+            if not reference.is_file():
+                raise ValueError("No completed run manifest; reproduce into a fresh output")
+            state = json.loads(reference.read_text())
+        if state.get("status") != "completed":
+            raise ValueError("Run incomplete; only completed outputs can be evaluated")
+        if state["methods"] != methods:
+            raise ValueError("Requested methods differ from completed run")
+        records, hashes = checked_files(out, state["mode"], methods)
+        source_ids = {r["id"] for r in records}
+        sources = {s["id"]: s["photo_sha256"] for s in items() if s["id"] in source_ids}
+        if state.get("source_sha256") != sources:
+            raise ValueError("Recorded source hashes differ from the pinned data configuration")
+        if hashes != state["sha256"]:
+            raise ValueError("Artifact hash mismatch")
+        write_scores(out, records, methods)
+
+
+def write_scores(out, records, methods):
+    rows = []
     for case in records:
         name = case["file"]
         target = Image.open(out / "truth" / name)
@@ -94,13 +191,17 @@ def render_case(out, names, name, destination):
     panel.save(out / destination)
 
 
-def run(out, demo, baseline, stage1_only=False):
+def generate(out, demo, baseline, stage1_only):
     for folder in ("truth", "degraded", "bicubic", "unsharp"):
         (out / folder).mkdir(parents=True, exist_ok=True)
     records = []
+    sources = {}
     subjects = [x for x in items() if x["id"] != "B083V9C8D2"]
     for item in subjects[:1] if demo else subjects:
-        clean, _, _ = prepare(item, size=512)
+        clean, _, digest = prepare(item, size=512)
+        if digest != item["photo_sha256"]:
+            raise ValueError(f"Source hash mismatch: {item['id']}")
+        sources[item["id"]] = digest
         for kind in ["jpeg"] if demo else ["blur", "noise", "jpeg"]:
             p = item["id"] + "-" + kind + ".png"
             low = degrade(clean, kind)
@@ -121,7 +222,41 @@ def run(out, demo, baseline, stage1_only=False):
         predict(out, "cpu")
     elif not baseline:
         restore(out)
-    evaluate(out, baseline, stage1_only)
+    return sources
+
+
+def run(out, demo, baseline, stage1_only=False):
+    methods = method_names(baseline, stage1_only)
+    state = {"status": "in_progress", "mode": "demo" if demo else "formal", "methods": methods}
+    out.mkdir(parents=True, exist_ok=True)
+    with output_lock(out):
+        save_state(out, state)
+        cache = out / ".cache"
+        cache.mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=cache) as scratch:
+            fresh = Path(scratch)
+            sources = generate(fresh, demo, baseline, stage1_only)
+            records, hashes = checked_files(fresh, state["mode"], methods)
+            write_scores(fresh, records, methods)
+            if "diffusion" in methods:
+                import torch
+                from src.restore import PIN
+                costs = [json.loads((fresh / "diffusion" / Path(r["file"]).with_suffix(".json")).read_text()) for r in records]
+                runtime = {
+                    "measurement": "Synchronized per-input GPU timing excludes model loading",
+                    "upstream": PIN, "device": torch.cuda.get_device_name(),
+                    "torch": str(torch.__version__), "numpy": np.__version__, "python": platform.python_version(),
+                    "steps": 10, "upscale": 2, "precision": "fp16", "cases": len(records),
+                    "mean_wall_seconds": float(np.mean([c["seconds"] for c in costs])),
+                    "max_allocated_mib": max(c["peak_allocated_mb"] for c in costs),
+                }
+                (fresh / "run-environment.json").write_text(json.dumps(runtime, indent=2))
+            for file in fresh.rglob("*"):
+                if file.is_file():
+                    destination = out / file.relative_to(fresh)
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    file.replace(destination)
+            save_state(out, state | {"status": "completed", "source_sha256": sources, "sha256": hashes})
 
 
 if __name__ == "__main__":
