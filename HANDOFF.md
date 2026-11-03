@@ -1,9 +1,2 @@
-# P04 交接记录
+Stage: CPU comparison across 12 degraded inputs. Rebuild with python run.py reproduce --classical-only, then python run.py evaluate --classical-only. Full upstream source revision checked out. Next step is the independent CUDA environment install and python run.py demo. Full stage-1/diffusion evidence and clean clone validation required for publication.
 
-当前阶段：上游版本已固定，正式验收待完成。
-
-最近已核实：项目远端以及 UPSTREAM.md 中的源码提交。
-
-待执行：运行上游入口 inference.py ，保存日志，再按项目 README 的实验目标添加留出集对照。
-
-验收要求：从干净克隆运行演示与正式基线，使用保存的预测重建结果，涉及训练则测试权重重载。
