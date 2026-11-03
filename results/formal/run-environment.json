@@ -1,5 +1,5 @@
 {
-  "measurement": "Full model timing and CUDA memory captured per input; device and package metadata verified on the same workstation",
+  "measurement": "Synchronized per-input GPU timing excludes model loading; device and package metadata verified on same workstation",
   "upstream": "5c2d6c177c3f2965e6d33a32931248d242ef7b3d",
   "device": "NVIDIA GeForce RTX 4060 Laptop GPU",
   "torch": "2.4.1+cu121",
@@ -9,6 +9,6 @@
   "upscale": 2,
   "precision": "fp16",
   "cases": 12,
-  "mean_wall_seconds": 4.112057641666979,
+  "mean_wall_seconds": 4.249824199999542,
   "max_allocated_mib": 4783.00390625
 }
