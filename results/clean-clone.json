@@ -1,0 +1,54 @@
+{
+  "commit": "e3cfa80109ac92916c51b23bdab583e3fed9cca7",
+  "tree": "89fe9b7c5e79bb6bd26a3a10d87ec7b911b8ee11",
+  "method": "Fresh private GitHub checkout with separate Python environment; shared SHA-checked DiffBIR weights and pinned source. Regenerated demo, all native-resolution formal cases, then recomputed scores from saved predictions.",
+  "native_sources": 4,
+  "formal_cases": 12,
+  "method_score_rows": 48,
+  "demo_cases": 1,
+  "comparisons": {
+    "truth": {
+      "pngs": 12,
+      "byte_identical": 12,
+      "maximum_per_image_rgb_mae_0_255": 0,
+      "maximum_channel_difference": 0
+    },
+    "degraded": {
+      "pngs": 12,
+      "byte_identical": 12,
+      "maximum_per_image_rgb_mae_0_255": 0,
+      "maximum_channel_difference": 0
+    },
+    "bicubic": {
+      "pngs": 12,
+      "byte_identical": 12,
+      "maximum_per_image_rgb_mae_0_255": 0,
+      "maximum_channel_difference": 0
+    },
+    "unsharp": {
+      "pngs": 12,
+      "byte_identical": 12,
+      "maximum_per_image_rgb_mae_0_255": 0,
+      "maximum_channel_difference": 0
+    },
+    "stage1": {
+      "pngs": 12,
+      "byte_identical": 12,
+      "maximum_per_image_rgb_mae_0_255": 0,
+      "maximum_channel_difference": 0
+    },
+    "diffusion": {
+      "pngs": 12,
+      "byte_identical": 12,
+      "maximum_per_image_rgb_mae_0_255": 0,
+      "maximum_channel_difference": 0
+    }
+  },
+  "max_score_differences": {
+    "psnr_db": 0.0,
+    "excess_edge_energy": 0.0,
+    "label_crop_mae": 0.0
+  },
+  "gpu": "RTX 4060 Laptop",
+  "timings": "Wall-clock timing and allocation records are verified per run, not expected to be identical."
+}

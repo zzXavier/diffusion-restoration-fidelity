@@ -44,3 +44,4 @@ Bicubic had the highest average PSNR by 0.073 dB, while SwinIR had lower label-r
 
 [Upstream implementation](UPSTREAM.md) · [Handoff](HANDOFF.md)
 
+An independent GitHub clean clone regenerated one demo and all twelve formal cases using its own Python environment. All 72 reference, degraded and predicted PNGs were byte-identical, with zero metric differences across all 48 method rows. Nine source, evaluation and state-integrity tests passed. [Clean-clone audit](results/clean-clone.json)
