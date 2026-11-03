@@ -4,6 +4,11 @@
     "excess_edge_energy": 0.005641335547619656,
     "label_crop_mae": 0.030968903482802335
   },
+  "stage1": {
+    "psnr_db": 30.425042718185534,
+    "excess_edge_energy": 0.0019615339557589526,
+    "label_crop_mae": 0.029825527772084443
+  },
   "unsharp": {
     "psnr_db": 28.545741857950503,
     "excess_edge_energy": 0.012368387957803562,
