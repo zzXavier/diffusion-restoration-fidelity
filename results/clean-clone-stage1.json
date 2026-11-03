@@ -1,0 +1,10 @@
+{
+  "commit": "bfee3697b27a89b50d03d9bf91fedb1e9c94861c",
+  "clone": "private GitHub remote",
+  "command": "python run.py reproduce --stage1-only",
+  "rescore": "python run.py evaluate --stage1-only",
+  "images": 12,
+  "pixel_files_identical": 12,
+  "max_summary_absolute_difference": 6.938893903907228e-18,
+  "covers_diffusion_stage": false
+}

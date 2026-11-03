@@ -1,4 +1,10 @@
-Stage: CPU comparison across 12 degraded inputs. Rebuild with python run.py reproduce --classical-only, then python run.py evaluate --classical-only. Full upstream source revision checked out. Next step is the independent CUDA environment install and python run.py demo. Full stage-1/diffusion evidence and clean clone validation required for publication.
+# Handoff
 
-The real upstream SwinIR stage-1 now passes 12/12 inputs; replay python run.py evaluate --stage1-only. Source checkpoint SHA-256 577b8f84815d324e5ee17ef3c85d8bc9b7ebd05b20a6d61a5452b66e7e24dcaf. Full weights are pinned in src/fetch_full.py. GPU diffusion and clean-clone validation remain.
-The full DiffBIR BSRInferenceLoop imported with torch 2.4.1+cu121 and NumPy 1.26.4. Perf evidence for stage-1-only is in results/classical/stage1/runtime.json (CPU mean ~2.43 s per image).
+The original upstream comic3 sample and the complete held-out experiment ran on an 8 GiB RTX 4060 Laptop using DiffBIR v2.1, CUDA fp16, 2× restoration and 10 steps. The upstream freeze is 5c2d6c177c3f2965e6d33a32931248d242ef7b3d; the three model digests are in src/fetch_full.py.
+
+- Main run: results/formal. Twelve degraded inputs each have a reference, bicubic restoration, unsharp restoration, actual intermediate cleaner prediction and full diffusion prediction. Independent saved-image rescoring: python run.py evaluate. Input-level wall-clock costs and CUDA peaks are in results/formal/diffusion/*.json.
+- Primary results: stage1 PSNR 30.428 dB, full diffusion 23.697 dB on six held-out cases. The blurred coffee tin has the highest excess edge proxy in the diffusion outputs. Inspect results/formal/highest-excess-edge.jpg. Per-case model cost excludes initial loading.
+- Supporting run: results/classical (CPU SwinIR and both baselines). A separate private GitHub clean clone at bfee3697 reproduced all twelve CPU SwinIR PNGs byte-for-byte. Two automated tests pass.
+- To resume from an existing verified model cache, point DIFFBIR_SOURCE at the exact upstream checkout containing its weights directory. Run python run.py demo and python run.py reproduce with a separate --output for an independent full-GPU check.
+- Publication gate: rerun the full GPU experiment and demo from the private remote's fresh clone, compare outputs, and record the result.
+

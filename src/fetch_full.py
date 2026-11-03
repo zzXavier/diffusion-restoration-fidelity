@@ -1,8 +1,8 @@
 """Prepare SHA256-verified v2.1 weights in the upstream cache; supports resume."""
 
 from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
 import hashlib
+import os
 import time
 import requests
 
@@ -33,7 +33,7 @@ def local_hash(path):
         return hashlib.file_digest(f, "sha256").hexdigest()
 
 
-def fetch_one(folder, name, size, expected):
+def fetch_one(folder, name, size, expected, tail_only=False):
     dest = folder / name
     if dest.exists() and local_hash(dest) == expected:
         return
@@ -53,7 +53,7 @@ def fetch_one(folder, name, size, expected):
         target = end - start + 1
         if path.exists() and path.stat().st_size == target:
             return path
-        tmp = path.with_suffix(".pending")
+        tmp = path.with_suffix(f".{os.getpid()}.pending")
         for i in range(5):
             try:
                 with requests.get(
@@ -78,8 +78,13 @@ def fetch_one(folder, name, size, expected):
                     raise
                 time.sleep(2 + i)
 
+    starts = range(0, size, chunk_size)
+    if tail_only:
+        starts = reversed(starts[len(starts) // 2 :])
     with ThreadPoolExecutor(max_workers=5) as executor:
-        downloaded = list(executor.map(part, range(0, size, chunk_size)))
+        downloaded = list(executor.map(part, starts))
+    if tail_only:
+        return
     tmp = dest.with_suffix(".assembling")
     digest = hashlib.sha256()
     with tmp.open("wb") as out:
@@ -105,4 +110,16 @@ def fetch():
 
 
 if __name__ == "__main__":
-    fetch()
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--tail-only",
+        action="store_true",
+        help="Pre-fetch upper half of the SD backbone while a normal fetch is running.",
+    )
+    if parser.parse_args().tail_only:
+        filename = "sd2.1-base-zsnr-laionaes5.ckpt"
+        fetch_one(locate() / "weights", filename, *FILES[filename], tail_only=True)
+    else:
+        fetch()

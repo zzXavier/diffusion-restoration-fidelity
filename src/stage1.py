@@ -4,7 +4,6 @@ from pathlib import Path
 import argparse
 import hashlib
 import importlib.util
-import sys
 import time
 import json
 from PIL import Image
@@ -71,7 +70,7 @@ def fetch(dest):
 def predict(out, device):
     torch.set_num_threads(4)
     root = locate()
-    weights = fetch(root.parent / FILENAME)
+    weights = fetch(root / "weights" / FILENAME)
     config = yaml.safe_load(
         (root / "configs" / "inference" / "swinir.yaml").read_text()
     )["params"]

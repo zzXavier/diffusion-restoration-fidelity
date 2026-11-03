@@ -1,0 +1,74 @@
+[
+  {
+    "id": "B07FFHHG1Q",
+    "split": "dev",
+    "kind": "blur",
+    "file": "B07FFHHG1Q-blur.png"
+  },
+  {
+    "id": "B07FFHHG1Q",
+    "split": "dev",
+    "kind": "noise",
+    "file": "B07FFHHG1Q-noise.png"
+  },
+  {
+    "id": "B07FFHHG1Q",
+    "split": "dev",
+    "kind": "jpeg",
+    "file": "B07FFHHG1Q-jpeg.png"
+  },
+  {
+    "id": "B07QCR35JF",
+    "split": "dev",
+    "kind": "blur",
+    "file": "B07QCR35JF-blur.png"
+  },
+  {
+    "id": "B07QCR35JF",
+    "split": "dev",
+    "kind": "noise",
+    "file": "B07QCR35JF-noise.png"
+  },
+  {
+    "id": "B07QCR35JF",
+    "split": "dev",
+    "kind": "jpeg",
+    "file": "B07QCR35JF-jpeg.png"
+  },
+  {
+    "id": "B074H6ZXT5",
+    "split": "test",
+    "kind": "blur",
+    "file": "B074H6ZXT5-blur.png"
+  },
+  {
+    "id": "B074H6ZXT5",
+    "split": "test",
+    "kind": "noise",
+    "file": "B074H6ZXT5-noise.png"
+  },
+  {
+    "id": "B074H6ZXT5",
+    "split": "test",
+    "kind": "jpeg",
+    "file": "B074H6ZXT5-jpeg.png"
+  },
+  {
+    "id": "B0752GQ94S",
+    "split": "test",
+    "kind": "blur",
+    "file": "B0752GQ94S-blur.png"
+  },
+  {
+    "id": "B0752GQ94S",
+    "split": "test",
+    "kind": "noise",
+    "file": "B0752GQ94S-noise.png"
+  },
+  {
+    "id": "B0752GQ94S",
+    "split": "test",
+    "kind": "jpeg",
+    "file": "B0752GQ94S-jpeg.png"
+  }
+]

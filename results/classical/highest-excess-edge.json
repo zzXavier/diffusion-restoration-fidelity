@@ -1,0 +1,10 @@
+{
+  "id": "B074H6ZXT5",
+  "split": "test",
+  "kind": "noise",
+  "file": "B074H6ZXT5-noise.png",
+  "method": "stage1",
+  "psnr_db": 28.076843908662035,
+  "excess_edge_energy": 0.0036084343405330876,
+  "label_crop_mae": 0.03125647616770286
+}
